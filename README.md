@@ -1,6 +1,7 @@
 # pepinito
 
-The project uses [Midje](https://github.com/marick/Midje/).
+An implementation of a subset of Python's pickle serialisation
+protocol in Clojure.
 
 ## How to run the tests
 
