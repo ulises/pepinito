@@ -46,7 +46,7 @@
 (def TUPLE           \t)
 (def EMPTY-TUPLE     \))
 (def SETITEMS        \u)
-(def BINFLOAT        \G)
+(def BINFLOAT        (asc \G))
 (def  VERSION        0x02)
 (def  PROTO          0x80)
 (def  NEWOBJ         0x81)
@@ -63,14 +63,18 @@
 
 (declare dump*)
 
-(defn write-byte [^DataOutputStream os ^Character c]
+(defn- write-byte [^DataOutputStream os ^Character c]
   (.writeByte os c))
 
-(defn write-int [^DataOutputStream os ^Integer i]
+(defn- write-int [^DataOutputStream os ^Integer i]
   (write-byte os (bit-and 0xff i))
   (write-byte os (bit-and 0xff (bit-shift-right i 8)))
   (write-byte os (bit-and 0xff (bit-shift-right i 16)))
   (write-byte os (bit-and 0xff (bit-shift-right i 24))))
+
+(defn- write-double [^DataOutputStream out ^Double d]
+  (.writeDouble out d))
+
 
 (defn dump [o ^DataOutputStream out]
   (write-byte out PROTO)
@@ -78,15 +82,23 @@
   (dump* o out)
   (write-byte out STOP))
 
-
 (defmulti dump* "Pickles objects" (fn [o _] (class o)))
 
-(defmethod dump* Integer
-  [i ^DataOutputStream out]
-  (dump* (long i) out))
-
 (defmethod dump* Long
-  [i ^DataOutputStream out]
+  [^Long l ^DataOutputStream out]
+  (dump* (double l) out))
+
+(defmethod dump* Float
+  [^Float l ^DataOutputStream out]
+  (dump* (double l) out))
+
+(defmethod dump* Double
+  [^Double d ^DataOutputStream out]
+  (write-byte out BINFLOAT)
+  (write-double out d))
+
+(defmethod dump* Integer
+  [^Integer i ^DataOutputStream out]
   (if (<= 0 i)
     (condp >= i
       0xff (do (write-byte out BININT1)
@@ -102,3 +114,9 @@
       -1 (do (write-byte out BININT)
              (write-int out i))
       (throw (IllegalArgumentException. (str "can't pickle " i))))))
+
+(defmethod dump* Boolean
+  [^Boolean b ^DataOutputStream out]
+  (if b
+    (write-byte out NEWTRUE)
+    (write-byte out NEWFALSE)))
