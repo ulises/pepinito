@@ -82,3 +82,11 @@
     (string-from-pickle true) => (slurp "test/resources/true.py.pickle"))
   (fact "pickle false"
     (string-from-pickle false) => (slurp "test/resources/false.py.pickle")))
+
+(facts "about pickling strings"
+  (fact "pickle short string (< 256)"
+    (string-from-pickle "hello world") => (slurp "test/resources/hello.py.pickle"))
+
+  (fact "pickle long string (> 256)"
+    (let [long-string (reduce str (repeat 257 \a))]
+      (string-from-pickle long-string) => (slurp "test/resources/257a.py.pickle"))))

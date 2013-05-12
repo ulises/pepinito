@@ -22,8 +22,8 @@
 (def BINPERSID       \Q)
 (def REDUCE          \R)
 (def STRING          \S)
-(def BINSTRING       \T)
-(def SHORT-BINSTRING \U)
+(def BINSTRING       (asc \T))
+(def SHORT-BINSTRING (asc \U))
 (def UNICODE         \V)
 (def BINUNICODE      \X)
 (def APPEND          \a)
@@ -40,8 +40,8 @@
 (def EMPTY-LIST      \])
 (def OBJ             \o)
 (def PUT             \p)
-(def BINPUT          \q)
-(def LONG-BINPUT     \r)
+(def BINPUT          (asc \q))
+(def LONG-BINPUT     (asc \r))
 (def SETITEM         \s)
 (def TUPLE           \t)
 (def EMPTY-TUPLE     \))
@@ -75,30 +75,37 @@
 (defn- write-double [^DataOutputStream out ^Double d]
   (.writeDouble out d))
 
+(defn- write-idx [^DataOutputStream out ^Integer idx]
+  (if (< idx 256)
+    (do (write-byte out BINPUT)
+        (write-byte out idx))
+    (do (write-byte out LONG-BINPUT)
+        (write-int out idx)))
+  (inc idx))
 
 (defn dump [o ^DataOutputStream out]
   (write-byte out PROTO)
   (write-byte out VERSION)
-  (dump* o out)
+  (dump* o out 0)
   (write-byte out STOP))
 
-(defmulti dump* "Pickles objects" (fn [o _] (class o)))
+(defmulti dump* "Pickles objects" (fn [obj out idx] (class obj)))
 
 (defmethod dump* Long
-  [^Long l ^DataOutputStream out]
-  (dump* (double l) out))
+  [^Long l ^DataOutputStream out ^Integer _idx]
+  (dump* (double l) out _idx))
 
 (defmethod dump* Float
-  [^Float l ^DataOutputStream out]
-  (dump* (double l) out))
+  [^Float l ^DataOutputStream out ^Integer _idx]
+  (dump* (double l) out _idx))
 
 (defmethod dump* Double
-  [^Double d ^DataOutputStream out]
+  [^Double d ^DataOutputStream out ^Integer _idx]
   (write-byte out BINFLOAT)
   (write-double out d))
 
 (defmethod dump* Integer
-  [^Integer i ^DataOutputStream out]
+  [^Integer i ^DataOutputStream out ^Integer _idx]
   (if (<= 0 i)
     (condp >= i
       0xff (do (write-byte out BININT1)
@@ -116,7 +123,27 @@
       (throw (IllegalArgumentException. (str "can't pickle " i))))))
 
 (defmethod dump* Boolean
-  [^Boolean b ^DataOutputStream out]
+  [^Boolean b ^DataOutputStream out ^Integer _idx]
   (if b
     (write-byte out NEWTRUE)
     (write-byte out NEWFALSE)))
+
+(defn- encode-short-string [^String s ^DataOutputStream out ^Integer idx]
+  (write-byte out SHORT-BINSTRING)
+  (write-byte out (count s))
+  (doseq [b (map asc s)]
+    (write-byte out b))
+  (write-idx out idx))
+
+(defn- encode-long-string [^String s ^DataOutputStream out ^Integer idx]
+  (write-byte out BINSTRING)
+  (write-int out (count s))
+  (doseq [b (map asc s)]
+    (write-byte out b))
+  (write-idx out idx))
+
+(defmethod dump* String
+  [^String s ^DataOutputStream out ^Integer idx]
+  (if (< (count s) 256)
+    (encode-short-string s out idx)
+    (encode-long-string s out idx)))
