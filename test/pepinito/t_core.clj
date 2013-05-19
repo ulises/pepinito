@@ -14,6 +14,8 @@
     (dump o os)
     (os->str baos)))
 
+(def long-string (reduce str (repeat 257 \a)))
+
 (facts "about pickling ints"
   (fact "pickle 1"
     (string-from-pickle (int 1)) => (slurp "test/resources/1.py.pickle"))
@@ -88,8 +90,7 @@
     (string-from-pickle "hello world") => (slurp "test/resources/hello.py.pickle"))
 
   (fact "pickle long string (> 256)"
-    (let [long-string (reduce str (repeat 257 \a))]
-      (string-from-pickle long-string) => (slurp "test/resources/257a.py.pickle"))))
+    (string-from-pickle long-string) => (slurp "test/resources/257a.py.pickle")))
 
 (facts "about pickling tuples of 1 element"
   (fact "pickle tuple with int"
@@ -105,7 +106,20 @@
   (fact "pickle tuple with short string"
     (string-from-pickle ["hello"]) => (slurp "test/resources/short-string.tuple1.py.pickle"))
   (fact "pickle tuple with long string"
-    (let [long-string (reduce str (repeat 257 \a))]
-      (string-from-pickle [long-string]) => (slurp "test/resources/long-string.tuple1.py.pickle")))
+    (string-from-pickle [long-string]) => (slurp "test/resources/long-string.tuple1.py.pickle"))
   (fact "pickle tuple with tuple with int"
     (string-from-pickle [[(int 1)]]) => (slurp "test/resources/int-tuple.tuple1.py.pickle")))
+
+;;; necessarily shorter -and less comprehensive- than tuple-1 tests
+;;; due to the combinatorial explosion of possibilities
+(facts "about pickling tuples of 2 elements"
+  (fact "pickle tuple with ints"
+    (string-from-pickle [(int 1) (int 2)]) => (slurp "test/resources/int.tuple2.py.pickle"))
+  (fact "pickle tuple with int-float"
+    (string-from-pickle [(int 1) (float 2)]) => (slurp "test/resources/int-float.tuple2.py.pickle"))
+  (fact "pickle tuple with int and short string"
+    (string-from-pickle [(int 1) "hello"]) => (slurp "test/resources/int-short-string.tuple2.py.pickle"))
+  (fact "pickle tuple with long string and single-int tuple"
+    (string-from-pickle [long-string [(int 1)]]) => (slurp "test/resources/long-string-int-tuple.tuple2.py.pickle"))
+  (fact "pickle tuple with long string and an int-int tuple"
+    (string-from-pickle [long-string [(int 1) (int 2)]]) => (slurp "test/resources/long-string-int-tuple2.tuple2.py.pickle")))
