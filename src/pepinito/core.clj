@@ -165,9 +165,18 @@
     (write-byte out TUPLE2)
     (maybe-write-idx out next-idx2 putvar)))
 
+(defn- encode-tuple-3 [^clojure.lang.PersistentVector [item1 item2 item3]
+                       ^DataOutputStream out ^Integer idx putvar]
+  (let [next-idx1 (dump* item1 out idx putvar)
+        next-idx2 (dump* item2 out next-idx1 putvar)
+        next-idx3 (dump* item3 out next-idx2 putvar)]
+    (write-byte out TUPLE3)
+    (maybe-write-idx out next-idx3 putvar)))
+
 (defmethod dump* clojure.lang.PersistentVector
   [^clojure.lang.PersistentVector tuple ^DataOutputStream out ^Integer idx putvar]
   (condp #(= %1 (count %2)) tuple
     1 (encode-tuple-1 tuple out idx putvar)
     2 (encode-tuple-2 tuple out idx putvar)
+    3 (encode-tuple-3 tuple out idx putvar)
     (throw (Exception. "Argh!"))))

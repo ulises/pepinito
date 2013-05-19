@@ -123,3 +123,11 @@
     (string-from-pickle [long-string [(int 1)]]) => (slurp "test/resources/long-string-int-tuple.tuple2.py.pickle"))
   (fact "pickle tuple with long string and an int-int tuple"
     (string-from-pickle [long-string [(int 1) (int 2)]]) => (slurp "test/resources/long-string-int-tuple2.tuple2.py.pickle")))
+
+(facts "about pickling tuples of 3 elements"
+  (fact "pickle tuple with ints"
+    (string-from-pickle [(int 1) (int 2) (int 3)]) => (slurp "test/resources/int.tuple3.py.pickle"))
+  (fact "pickle tuple with int, short string and long"
+    (string-from-pickle [(int 1) "hello" (long 3)]) => (slurp "test/resources/int-short-string-long.tuple3.py.pickle"))
+  (fact "pickle tuple with long string, int-tuple-1, boolean-float-long-tuple3"
+    (string-from-pickle [long-string [(int 1)] [true (float 2) (long 3)]]) => (slurp "test/resources/long-string-ituple1-bfltuple3.tuple3.py.pickle")))
