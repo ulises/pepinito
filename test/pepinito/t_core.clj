@@ -11,7 +11,7 @@
 (defn- string-from-pickle [o]
   (let [baos (ByteArrayOutputStream.)
         os (DataOutputStream. baos)]
-    (dump o os)
+    (dump os o)
     (os->str baos)))
 
 (def long-string (reduce str (repeat 257 \a)))
