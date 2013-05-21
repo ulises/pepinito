@@ -130,4 +130,30 @@
   (fact "pickle tuple with int, short string and long"
     (string-from-pickle [(int 1) "hello" (long 3)]) => (slurp "test/resources/int-short-string-long.tuple3.py.pickle"))
   (fact "pickle tuple with long string, int-tuple-1, boolean-float-long-tuple3"
-    (string-from-pickle [long-string [(int 1)] [true (float 2) (long 3)]]) => (slurp "test/resources/long-string-ituple1-bfltuple3.tuple3.py.pickle")))
+    (string-from-pickle [long-string [(int 1)] [true (float 2) (long 3)]]) => (slurp "test/resources/long-string-ituple1-bfltuple3.tuple3.py.pickle"))
+  ;; python's pickled output doesn't contain multiple copies of the
+  ;; same object. Although pepinito doesn't do this yet, python will
+  ;; happily read pepinito's non-optimized data.
+  (comment
+    (fact "pickle tuple with long strings only"
+      (string-from-pickle [long-string long-string long-string]) => (slurp "test/resources/long-string.tuple3.py.pickle"))))
+
+(facts "about pickling tuples of N elements"
+  (fact "pickle tuple with 10 ints"
+    (string-from-pickle [(int 1) (int 2) (int 3) (int 4) (int 5)
+                         (int 6) (int 7) (int 8) (int 9) (int 0)]) =>
+                         (slurp "test/resources/int.tuple10.py.pickle"))
+  (fact "pickle tuple with int, long-string, tuple-1, and float"
+    (string-from-pickle [(int 1) long-string [(double 2)] (float 3)]) =>
+    (slurp "test/resources/int-longstring-tuple1-float.py.pickle"))
+  ;; python's pickled output doesn't contain multiple copies of the
+  ;; same object. Although pepinito doesn't do this yet, python will
+  ;; happily read pepinito's non-optimized data.
+  (comment
+    (fact "pickle tuple with int-tuple-4 short-string-tuple-2 long-string-tuple-7 and float-tuple-5"
+      (string-from-pickle [[(int 1) (int 2) (int 3) (int 4)]
+                           ["hello" "world"]
+                           [long-string long-string long-string long-string
+                            long-string long-string long-string]
+                           [(float 1) (float 2) (float 3) (float 4) (float 5)]]) =>
+                           (slurp "test/resources/complex.tuple4.py.pickle"))))

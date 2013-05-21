@@ -6,7 +6,7 @@
   (let [bytes (.getBytes (str c))]
     (first bytes)))
 
-(def MARK            \()
+(def MARK            (asc \())
 (def STOP            0x2e)
 (def POP             \0)
 (def POP-MARK        \1)
@@ -43,7 +43,7 @@
 (def BINPUT          (asc \q))
 (def LONG-BINPUT     (asc \r))
 (def SETITEM         \s)
-(def TUPLE           \t)
+(def TUPLE           (asc \t))
 (def EMPTY-TUPLE     \))
 (def SETITEMS        \u)
 (def BINFLOAT        (asc \G))
@@ -173,10 +173,19 @@
     (write-byte out TUPLE3)
     (maybe-write-idx out next-idx3 putvar)))
 
+(defn- encode-tuple-n [^clojure.lang.PersistentVector tuple
+                       ^DataOutputStream out ^Integer idx putvar]
+  (write-byte out MARK)
+  (let [new-idx (reduce (fn [old-idx item]
+                          (dump* item out old-idx putvar)) idx
+                        tuple)]
+    (write-byte out TUPLE)
+  (maybe-write-idx out new-idx putvar)))
+
 (defmethod dump* clojure.lang.PersistentVector
   [^clojure.lang.PersistentVector tuple ^DataOutputStream out ^Integer idx putvar]
   (condp #(= %1 (count %2)) tuple
     1 (encode-tuple-1 tuple out idx putvar)
     2 (encode-tuple-2 tuple out idx putvar)
     3 (encode-tuple-3 tuple out idx putvar)
-    (throw (Exception. "Argh!"))))
+    (encode-tuple-n tuple out idx putvar)))
