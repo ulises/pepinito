@@ -157,3 +157,23 @@
                             long-string long-string long-string]
                            [(float 1) (float 2) (float 3) (float 4) (float 5)]]) =>
                            (slurp "test/resources/complex.tuple4.py.pickle"))))
+
+;;; only order preserving collections
+(facts "about pickling sequential collections"
+  (fact "pickle a list of ints"
+    (string-from-pickle (list (int 1) (int 2) (int 3))) =>
+    (slurp "test/resources/int-list.py.pickle"))
+
+  (fact "pickle a list of short strings"
+    (string-from-pickle (list "hello" "world")) =>
+    (slurp "test/resources/short-string-list.py.pickle"))
+
+  (fact "pickle a list of short string, int, and float"
+    (string-from-pickle (list "hello" (int 1) (float 2))) =>
+    (slurp "test/resources/short-string-int-float-list.py.pickle"))
+
+  (fact "pickle a list of long string, short string, int-tuple-1, short string tuple-2"
+    (string-from-pickle (list long-string "hello"
+                              [(int 1) (int 2)]
+                              ["hello" "world"])) =>
+    (slurp "test/resources/long-string-short-string-int-tuple1-short-string-tuple-2-list.py.pickle")))

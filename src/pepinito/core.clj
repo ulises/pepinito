@@ -15,8 +15,10 @@
 (def BINPUT          (asc \q))
 (def LONG-BINPUT     (asc \r))
 (def TUPLE           (asc \t))
-(def EMPTY-TUPLE     \))
+(def EMPTY-TUPLE     (asc \)))
+(def EMPTY-LIST      (asc \]))
 (def BINFLOAT        (asc \G))
+(def APPENDS         (asc \e))
 (def VERSION         0x02)
 (def PROTO           0x80)
 (def NEWOBJ          0x81)
@@ -175,3 +177,17 @@
     2 (encode-tuple-2 out tuple idx putvar)
     3 (encode-tuple-3 out tuple idx putvar)
     (encode-tuple-n out tuple idx putvar)))
+
+(defn- encode-sequential
+  [^DataOutputStream out ^clojure.lang.Sequential coll ^Integer idx putvar]
+  (write-byte out EMPTY-LIST)
+  (let [next-idx (maybe-write-idx out idx putvar)]
+    (write-byte out MARK)
+    (let [new-idx (reduce (fn [old-idx item]
+                            (dump* out item old-idx putvar)) next-idx
+                            coll)]
+      (write-byte out APPENDS))))
+
+(defmethod dump* clojure.lang.PersistentList
+  [^DataOutputStream out ^clojure.lang.PersistentList coll ^Integer idx putvar]
+  (encode-sequential out coll idx putvar))
