@@ -52,6 +52,8 @@ The following data structures can be pickled:
   * Numbers, i.e. Integer, Float, Double, and Long
   * Strings. Both short (len < 256) and long.
   * Tuples, i.e. clojure.lang.PersistentVector
+  * Order preserving collections. Only lists are picklable for now
+    though, i.e. clojure.lang.PersistentList.
 
 # Developing
 
