@@ -22,7 +22,7 @@ Pickle a vector into a file:
 
 ```clojure
 (ns com.example.my
-  (require [pepinito.core as pickle])
+  (require [pepinito.core :as pickle])
   (import [java.io DataOutputStream FileOutputStream]))
 
 (def out (DataOutputStream. (FileOutputStream. "some-file.pickle")))
@@ -34,7 +34,7 @@ or into a socket:
 
 ```clojure
 (ns com.example.my
-  (require [pepinito.core as pickle])
+  (require [pepinito.core :as pickle])
   (import [java.io DataOutputStream BufferedOutputStream]
           [java.net Socket]))
 
