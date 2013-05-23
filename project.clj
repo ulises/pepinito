@@ -1,4 +1,4 @@
-(defproject pepinito "0.0.1-SNAPSHOT"
+(defproject pepinito "0.0.1"
   :description "An implementation of a subset of Python's pickle format."
   :url "http://github.com/ulises/pepinito"
   :license {:name "Apache License Version 2.0"
@@ -9,4 +9,8 @@
                    :plugins [[lein-midje "3.0.0"]
                              [lein-kibit "0.0.8"]]}}
   :global-vars {*warn-on-reflection* true}
-  :deploy-branches ["master"])
+  :deploy-branches ["master"]
+  :repositories [["releases" {:url "https://clojars.org/repo"
+                              :creds :gpg}]
+                 ["snapshots" {:url "https://clojars.org/repo"
+                               :creds :gpg}]])
