@@ -1,5 +1,7 @@
 (ns pepinito.core
-  (:import java.io.DataOutputStream))
+  (:import (java.io DataOutputStream ByteArrayOutputStream)
+           (java.net Socket)
+           (java.nio ByteBuffer)))
 
 (defn- asc [c]
   (let [bytes (.getBytes (str c))]
@@ -43,6 +45,14 @@
   (dump* out obj 0 :putvar)
   (write-byte out STOP))
 
+(defn dumps
+  "Pickle object and return the result as a byte array"
+  [obj]
+  (let [bo (ByteArrayOutputStream.)
+        out (DataOutputStream. bo)]
+    (dump out obj)
+    (.flush ^ByteArrayOutputStream bo)
+    (.toByteArray bo)))
 
 (defn- write-byte
   [^DataOutputStream os ^Character c]
@@ -191,3 +201,13 @@
 (defmethod dump* clojure.lang.PersistentList
   [^DataOutputStream out ^clojure.lang.PersistentList coll ^Integer idx putvar]
   (encode-sequential out coll idx putvar))
+
+
+(defn send-pickled [o & {:keys [host port]}]
+  (let [c (Socket. (or host "192.168.0.18") (or port 2004))
+        out (DataOutputStream. (.getOutputStream c))
+        pickled-str (dumps o)
+        header (.array (.putInt (ByteBuffer/allocate 4) (count pickled-str)))]
+    (.write out header)
+    (.write out pickled-str)
+    (.close out)))
