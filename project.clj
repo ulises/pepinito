@@ -1,4 +1,4 @@
-(defproject pepinito "0.0.2"
+(defproject pepinito "0.0.3-SNAPSHOT"
   :description "An implementation of a subset of Python's pickle format."
   :url "http://github.com/ulises/pepinito"
   :license {:name "Apache License Version 2.0"

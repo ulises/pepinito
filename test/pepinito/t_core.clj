@@ -5,14 +5,8 @@
             OutputStream]
            [java.lang String]))
 
-(defn- os->str [^ByteArrayOutputStream os]
-  (String. (.toByteArray os)))
-
 (defn- string-from-pickle [o]
-  (let [baos (ByteArrayOutputStream.)
-        os (DataOutputStream. baos)]
-    (dump os o)
-    (os->str baos)))
+  (String. (dumps o)))
 
 (def long-string (reduce str (repeat 257 \a)))
 
@@ -164,16 +158,35 @@
     (string-from-pickle (list (int 1) (int 2) (int 3))) =>
     (slurp "test/resources/int-list.py.pickle"))
 
+  (fact "pickle a lazyseq of ints"
+    (string-from-pickle (map (fn [i] (int i)) (range 1 4))) =>
+    (slurp "test/resources/int-list.py.pickle"))
+
   (fact "pickle a list of short strings"
     (string-from-pickle (list "hello" "world")) =>
+    (slurp "test/resources/short-string-list.py.pickle"))
+
+  (fact "pickle a lazyseq of short strings"
+    (string-from-pickle (map identity (list "hello" "world"))) =>
     (slurp "test/resources/short-string-list.py.pickle"))
 
   (fact "pickle a list of short string, int, and float"
     (string-from-pickle (list "hello" (int 1) (float 2))) =>
     (slurp "test/resources/short-string-int-float-list.py.pickle"))
 
+  (fact "pickle a lazyseq of short string, int, and float"
+    (string-from-pickle (map identity (list "hello" (int 1) (float 2)))) =>
+    (slurp "test/resources/short-string-int-float-list.py.pickle"))
+
   (fact "pickle a list of long string, short string, int-tuple-1, short string tuple-2"
     (string-from-pickle (list long-string "hello"
                               [(int 1) (int 2)]
                               ["hello" "world"])) =>
-    (slurp "test/resources/long-string-short-string-int-tuple1-short-string-tuple-2-list.py.pickle")))
+                              (slurp "test/resources/long-string-short-string-int-tuple1-short-string-tuple-2-list.py.pickle"))
+
+  (fact "pickle a lazyseq of long string, short string, int-tuple-1, short string tuple-2"
+    (string-from-pickle (map identity
+                             (list long-string "hello"
+                                   [(int 1) (int 2)]
+                                   ["hello" "world"]))) =>
+                                   (slurp "test/resources/long-string-short-string-int-tuple1-short-string-tuple-2-list.py.pickle")))
