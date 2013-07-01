@@ -2,6 +2,8 @@
 
 A writer of a subset of Python's pickle serialisation protocol in Clojure.
 
+[![Build Status](https://travis-ci.org/ulises/pepinito.png?branch=master)](https://travis-ci.org/ulises/pepinito)
+
 ## Include it
 
 Include ``[pepinito "0.0.1-SNAPSHOT"]`` in your project.clj if you're
