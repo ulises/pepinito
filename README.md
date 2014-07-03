@@ -6,13 +6,13 @@ A writer of a subset of Python's pickle serialisation protocol in Clojure.
 
 ## Include it
 
-Include ``[pepinito "0.0.2"]`` in your project.clj if you're
+Include ``[pepinito "0.0.3"]`` in your project.clj if you're
 using leiningen. Alternatively, add
 ```XML
 <dependency>
   <groupId>pepinito</groupId>
   <artifactId>pepinito</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
 </dependency>
 ```
 if you're using maven.
